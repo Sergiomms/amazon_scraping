@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Scraper</title>
+    <!-- Styling for the webpage -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    #container {
+      text-align: center;
+    }
+
+    input {
+      padding: 8px;
+      margin-right: 8px;
+    }
+
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    #results {
+      margin-top: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <!-- Header and input form -->
+    <h1>Amazon Scraper</h1>
+    <label for="keyword">Enter Keyword:</label>
+    <input type="text" id="keyword" placeholder="laptop">
+    <button onclick="scrapeAmazon()">Scrape</button>
+
+    <!-- Container for displaying results -->
+    <div id="results"></div>
+  </div>
+
+  <!-- JavaScript code for making AJAX call and updating the results dynamically -->
+  <script>
+    async function scrapeAmazon() {
+      // Get the keyword from the input field
+      const keyword = document.getElementById('keyword').value;
+      // Get the container for displaying results
+      const resultsContainer = document.getElementById('results');
+
+      // Check if the keyword is provided
+      if (!keyword) {
+        resultsContainer.innerHTML = '<p>Please enter a keyword.</p>';
+        return;
+      }
+
+      try {
+        // Make an AJAX call to the backend endpoint with the keyword
+        const response = await fetch(`http://localhost:3000/api/scrape?keyword=${encodeURIComponent(keyword)}`);
+        
+        // Parse the JSON response
+        const data = await response.json();
+
+        // Display the results on the page
+        resultsContainer.innerHTML = `
+          <h2>Results for "${keyword}":</h2>
+          <ul>
+            ${data.products.map(product => `
+              <li>
+                <strong>${product.title}</strong><br>
+                Rating: ${product.rating}<br>
+                Reviews: ${product.reviews}<br>
+                <img src="${product.image}" alt="${product.title}" style="max-width: 100px;">
+              </li>
+            `).join('')}
+          </ul>
+        `;
+      } catch (error) {
+        console.error(error);
+        resultsContainer.innerHTML = '<p>An error occurred. Please try again later.</p>';
+      }
+    }
+  </script>
+</body>
+</html>
